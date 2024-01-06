@@ -1,4 +1,4 @@
-import 'package:feynman_board/shared/presentation/screens/board.dart';
+import 'package:feynman_board/features/draw/presentation/screens/board.dart';
 import 'package:flutter/material.dart';
 
 void main() {
