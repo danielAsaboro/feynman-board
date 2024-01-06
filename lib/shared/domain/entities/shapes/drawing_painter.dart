@@ -1,10 +1,11 @@
 import 'dart:ui';
 
+import 'package:feynman_board/shared/domain/entities/shapes/brush.dart';
 import 'package:flutter/material.dart';
 
 import 'draw_object.dart';
 
-class DrawingPainter extends CustomPainter {
+class DrawingPainter extends CustomPainter with Brush {
   final List<DrawObject?> objects;
 
   DrawingPainter(this.objects);
@@ -17,20 +18,13 @@ class DrawingPainter extends CustomPainter {
         DrawObject nextObject = objects[i + 1]!;
 
         canvas.drawLine(currentObject.offset, nextObject.offset,
-            _getPaint(currentObject.color, currentObject.strokeWidth));
+            getPaint(currentObject.color, currentObject.strokeWidth));
       } else if (objects[i] != null && objects[i + 1] == null) {
         DrawObject drawObject = objects[i]!;
         canvas.drawPoints(PointMode.points, [drawObject.offset],
-            _getPaint(drawObject.color, drawObject.strokeWidth));
+            getPaint(drawObject.color, drawObject.strokeWidth));
       }
     }
-  }
-
-  Paint _getPaint(Color color, double strokeWidth) {
-    return Paint()
-      ..color = color
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = strokeWidth;
   }
 
   @override
