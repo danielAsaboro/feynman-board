@@ -13,6 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Feynman Board',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: false,
@@ -67,82 +68,111 @@ class _BoardWidgetState extends State<BoardWidget> {
               ),
             ),
             Positioned(
+              bottom: 12,
+              left: 12,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ...[1, 2, 3, 4, 5].map((e) {
-                    final isSelected = strokeWidth == e.toDouble();
-                    return InkWell(
-                      onTap: () {
-                        setState(() {
-                          strokeWidth = e.toDouble();
-                        });
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.all(5),
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: isSelected ? Colors.blue : Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            e.toString(),
-                            style: TextStyle(
-                              color: isSelected ? Colors.white : Colors.black,
-                              fontSize: 20,
+                  const Text("Stroke Width", style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  )),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ...[1, 2, 3, 4, 5].map((e) {
+                        final isSelected = strokeWidth == e;
+                        return InkWell(
+                          onTap: () {
+                            setState(() {
+                              strokeWidth = e.toDouble();
+                            });
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.all(5),
+                            width: 15,
+                            height: 15,
+                            decoration: BoxDecoration(
+                              border: isSelected
+                                  ? Border.all(color: Colors.black)
+                                  : null,
+                              color: Colors.grey.shade300,
+                            ),
+                            child: Center(
+                              child: Container(
+                                width: e.toDouble(),
+                                height: e.toDouble(),
+                                decoration: const BoxDecoration(
+                                  color: Colors.black,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ],
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width,
-                height: 50,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    ...[
-                      Colors.red,
-                      Colors.green,
-                      Colors.blue,
-                      Colors.amber,
-                      Colors.black,
-                      Colors.white,
-                    ].map((e) {
-                      final isSelected = color == e;
-                      return InkWell(
-                        onTap: () {
-                          setState(() {
-                            color = e;
-                          });
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.all(5),
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: e,
-                            shape: BoxShape.circle,
+                        );
+                      }).toList(),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Text("Color", style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  )),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ...[
+                        Colors.red,
+                        Colors.green,
+                        Colors.blue,
+                        Colors.amber,
+                        Colors.black,
+                        Colors.white,
+                      ].map((e) {
+                        final isSelected = color == e;
+                        return InkWell(
+                          onTap: () {
+                            setState(() {
+                              color = e;
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(1),
+                            decoration: isSelected
+                                ? const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.fromBorderSide(
+                                      BorderSide(
+                                        color: Colors.black,
+                                        width: 2,
+                                      ),
+                                    ),
+                                  )
+                                : null,
+                            child: Container(
+                              margin: const EdgeInsets.all(5),
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color: e,
+                                shape: BoxShape.circle,
+                              ),
+                              child: isSelected
+                                  ? const Center(
+                                    child: Icon(
+                                        Icons.done,
+                                        color: Colors.white,
+                                      size: 15,
+                                      ),
+                                  )
+                                  : Container(),
+                            ),
                           ),
-                          child: isSelected
-                              ? const Icon(
-                                  Icons.done,
-                                  color: Colors.white,
-                                )
-                              : Container(),
-                        ),
-                      );
-                    }).toList(),
-                  ],
-                ),
+                        );
+                      }).toList(),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
