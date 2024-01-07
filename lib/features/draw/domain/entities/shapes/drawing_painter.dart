@@ -7,8 +7,13 @@ import 'draw_object.dart';
 
 class DrawingPainter extends CustomPainter with Brush {
   final List<DrawObject?> objects;
+  final List<Rect> rectangles;
+  final Rect? currentRectangle;
 
-  DrawingPainter(this.objects);
+  DrawingPainter(this.objects, {
+    required this.rectangles,
+    required this.currentRectangle,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -24,6 +29,19 @@ class DrawingPainter extends CustomPainter with Brush {
         canvas.drawPoints(PointMode.points, [drawObject.offset],
             getPaint(drawObject.color, drawObject.strokeWidth));
       }
+    }
+
+    Paint paint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4.0;
+
+    for (Rect rectangle in rectangles) {
+      canvas.drawRect(rectangle, paint);
+    }
+
+    if (currentRectangle != null) {
+      canvas.drawRect(currentRectangle!, paint);
     }
   }
 

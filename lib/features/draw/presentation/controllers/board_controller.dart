@@ -1,3 +1,4 @@
+import 'package:feynman_board/features/draw/presentation/screens/board.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -63,6 +64,10 @@ class BoardControllerNotifier extends Notifier<BoardContent> {
       allLastSavedState.removeAt(allLastSavedStateLength - 1);
       state = state.copyWith(allLastSavedState: allLastSavedState);
     }
+  }
+
+  void changeStrokeType(StrokeType strokeType) {
+    state = state.copyWith(strokeType: strokeType);
   }
 }
 

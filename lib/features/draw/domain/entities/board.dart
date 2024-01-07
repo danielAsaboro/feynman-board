@@ -1,11 +1,12 @@
+import 'package:feynman_board/features/draw/presentation/screens/board.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'shapes/draw_object.dart';
 
 class BoardContent {
   late final Color brushColor;
   late final double strokeWidth;
+  late final StrokeType strokeType;
   late final List<DrawObject?> oldScribbles;
   late final List<DrawObject?> currentScribbles;
   late final List<DrawObject?> previouslySavedScribbles;
@@ -29,6 +30,7 @@ class BoardContent {
   BoardContent({
     double? strokeWidth,
     Color? brushColor,
+    StrokeType? strokeType,
     List<DrawObject?>? oldScribbles,
     List<DrawObject?>? previouslySavedScribbles,
     List<DrawObject?>? currentScribbles,
@@ -36,6 +38,7 @@ class BoardContent {
   }) {
     this.strokeWidth = strokeWidth ?? 5;
     this.brushColor = brushColor ?? Colors.black;
+    this.strokeType = strokeType ?? StrokeType.pen;
     this.oldScribbles = oldScribbles ?? [];
     this.previouslySavedScribbles = previouslySavedScribbles ?? [];
     this.currentScribbles = currentScribbles ?? [];
@@ -45,6 +48,7 @@ class BoardContent {
   BoardContent copyWith({
     double? strokeWidth,
     Color? brushColor,
+    StrokeType? strokeType,
     List<DrawObject?>? oldScribbles,
     List<DrawObject?>? previouslySavedScribbles,
     List<DrawObject?>? currentScribbles,
@@ -55,6 +59,7 @@ class BoardContent {
     return BoardContent(
       strokeWidth: strokeWidth ?? this.strokeWidth,
       brushColor: brushColor ?? this.brushColor,
+      strokeType: strokeType ?? this.strokeType,
       oldScribbles: oldScribbles ?? List.from(this.oldScribbles),
       previouslySavedScribbles:
           previouslySavedScribbles ?? List.from(this.previouslySavedScribbles),
