@@ -1,4 +1,3 @@
-import 'package:feynman_board/features/draw/domain/entities/board.dart';
 import 'package:feynman_board/features/draw/presentation/components/stroke_type_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,9 +26,24 @@ class BoardWidget extends ConsumerStatefulWidget {
 }
 
 class _BoardWidgetState extends ConsumerState<BoardWidget> {
-  List<Rect> rectangles = [];
   Rect? currentRectangle;
-  Offset? rectanglePoint;
+  Offset? startingPoint;
+  List<Offset?> currentLinePath = [];
+
+  List<DrawObject> savedDrawObjects = [];
+
+  List<DrawObject> get objectsToDraw => [    ...savedDrawObjects,
+    if(currentLinePath.isNotEmpty) LineObject(
+      currentLinePath,
+      ref.read(boardContentProvider).strokeWidth,
+      ref.read(boardContentProvider).brushColor,
+    ),
+    if(currentRectangle != null) RectangleObject(
+      currentRectangle!,
+      ref.read(boardContentProvider).strokeWidth,
+      ref.read(boardContentProvider).brushColor,
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -46,53 +60,44 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
                 onPanDown: (details) {
                   if (strokeType == StrokeType.rectangle) {
                     setState(() {
-                      // currentRectangle = Rect.fromPoints(details.globalPosition, details.globalPosition);
-                      rectanglePoint = details.globalPosition;
+                      startingPoint = details.globalPosition;
                     });
                   }
                 },
                 onPanUpdate: (details) {
-                  if (strokeType == StrokeType.rectangle) {
-                    setState(() {
-                      currentRectangle = Rect.fromPoints(rectanglePoint!, details.globalPosition);
-                    });
-                  } else {
-                    RenderBox renderBox =
-                        context.findRenderObject() as RenderBox;
-                    final offset =
-                        renderBox.globalToLocal(details.globalPosition);
-
-                    final newScribble = DrawObject(
-                      offset,
-                      boardContent.strokeWidth,
-                      boardContent.brushColor,
-                    );
-                    ref
-                        .read(boardContentProvider.notifier)
-                        .addToCurrentScribbles(newScribble);
-                  }
+                  setState(() {
+                    if(strokeType == StrokeType.pen) {
+                      currentLinePath.add(details.globalPosition);
+                    } else if (strokeType == StrokeType.rectangle) {
+                      currentRectangle=  Rect.fromPoints(startingPoint!, details.globalPosition);
+                    }
+                  });
                 },
                 onPanEnd: (details) {
-                  switch (strokeType) {
-                    case StrokeType.pen:
-                      // adding a null value here to separate individual strokes
-                      ref
-                          .read(boardContentProvider.notifier)
-                          .allCurrentScribblesToAllScribbles();
-                      break;
-                    case StrokeType.rectangle:
-                      setState(() {
-                        rectangles.add(currentRectangle!);
-                        currentRectangle = null;
-                      });
-                      break;
+                  if(strokeType == StrokeType.pen) {
+                    setState(() {
+                      savedDrawObjects.add(LineObject(
+                        currentLinePath,
+                        boardContent.strokeWidth,
+                        boardContent.brushColor,
+                      ));
+                      currentLinePath = [];
+                    });
+                  } else if (strokeType == StrokeType.rectangle) {
+                    setState(() {
+                      savedDrawObjects.add(RectangleObject(
+                        currentRectangle!,
+                        boardContent.strokeWidth,
+                        boardContent.brushColor,
+                      ));
+                      currentRectangle = null;
+                    });
                   }
+
                 },
                 child: CustomPaint(
                   painter: DrawingPainter(
-                    boardContent.allScribbles,
-                    rectangles: rectangles,
-                    currentRectangle: currentRectangle,
+                    objectsToDraw
                   ),
                 ),
               ),
