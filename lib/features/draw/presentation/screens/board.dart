@@ -12,6 +12,7 @@ import '../controllers/board_controller.dart';
 enum StrokeType {
   pen(Icons.edit),
   line(Icons.remove),
+  circle(Icons.circle_outlined),
   rectangle(Icons.crop_square);
 
   final IconData icon;
@@ -30,6 +31,7 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
   Rect? currentRectangle;
   Offset? startingPoint;
   LineObject? currentLine;
+  CircleObject? currentCircle;
   List<Offset?> currentPenPath = [];
 
   List<DrawObject> savedDrawObjects = [];
@@ -48,7 +50,8 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
             ref.read(boardContentProvider).strokeWidth,
             ref.read(boardContentProvider).brushColor,
           ),
-        if (currentLine != null) currentLine!
+        if (currentLine != null) currentLine!,
+        if (currentCircle != null) currentCircle!,
       ];
 
   @override
@@ -86,6 +89,23 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
                           boardContent.brushColor,
                         );
                         break;
+                      case StrokeType.circle:
+                        // calculate center offset between starting point and current point
+                        final center = Offset(
+                          (startingPoint!.dx + details.globalPosition.dx) / 2,
+                          (startingPoint!.dy + details.globalPosition.dy) / 2,
+                        );
+                        // calculate radius
+                        final radius =
+                            (center - details.globalPosition).distance;
+
+                        currentCircle = CircleObject(
+                          center,
+                          radius,
+                          boardContent.strokeWidth,
+                          boardContent.brushColor,
+                        );
+                        break;
                     }
                   });
                 },
@@ -117,6 +137,11 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
                         currentLine = null;
                       });
                       break;
+                    case StrokeType.circle:
+                      setState(() {
+                        savedDrawObjects.add(currentCircle!);
+                        currentCircle = null;
+                      });
                   }
                 },
                 child: CustomPaint(

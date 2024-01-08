@@ -40,3 +40,11 @@ class LineObject extends DrawObject {
   LineObject(this.startPoint, this.endPoint, double strokeWidth, Color color)
       : super(strokeWidth, color);
 }
+
+class CircleObject extends DrawObject {
+  final Offset center;
+  final double radius;
+
+  CircleObject(this.center, this.radius, double strokeWidth, Color color)
+      : super(strokeWidth, color);
+}
