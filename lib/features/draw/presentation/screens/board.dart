@@ -134,14 +134,26 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
             Positioned(
               top: 12,
               left: 12,
-              child: UndoChangesButton(ref: ref),
+              child: UndoChangesButton(
+                onPressed: () {
+                  setState(() {
+                    if (savedDrawObjects.isNotEmpty) {
+                      setState(() {
+                        savedDrawObjects.removeLast();
+                      });
+                    }
+                  });
+                },
+              ),
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          ref.read(boardContentProvider.notifier).clearBoard();
+          setState(() {
+            savedDrawObjects.clear();
+          });
         },
         child: const Icon(Icons.clear),
       ),
