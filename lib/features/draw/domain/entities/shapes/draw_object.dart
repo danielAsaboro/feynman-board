@@ -32,3 +32,11 @@ class RectangleObject extends DrawObject {
   RectangleObject(this.rect, double strokeWidth, Color color)
       : super(strokeWidth, color);
 }
+
+class LineObject extends DrawObject {
+  final Offset startPoint;
+  final Offset endPoint;
+
+  LineObject(this.startPoint, this.endPoint, double strokeWidth, Color color)
+      : super(strokeWidth, color);
+}

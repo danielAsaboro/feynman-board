@@ -11,6 +11,7 @@ import '../controllers/board_controller.dart';
 
 enum StrokeType {
   pen(Icons.edit),
+  line(Icons.remove),
   rectangle(Icons.crop_square);
 
   final IconData icon;
@@ -28,6 +29,7 @@ class BoardWidget extends ConsumerStatefulWidget {
 class _BoardWidgetState extends ConsumerState<BoardWidget> {
   Rect? currentRectangle;
   Offset? startingPoint;
+  LineObject? currentLine;
   List<Offset?> currentPenPath = [];
 
   List<DrawObject> savedDrawObjects = [];
@@ -46,6 +48,7 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
             ref.read(boardContentProvider).strokeWidth,
             ref.read(boardContentProvider).brushColor,
           ),
+        if (currentLine != null) currentLine!
       ];
 
   @override
@@ -61,41 +64,59 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
             Positioned.fill(
               child: GestureDetector(
                 onPanDown: (details) {
-                  if (strokeType == StrokeType.rectangle) {
-                    setState(() {
-                      startingPoint = details.globalPosition;
-                    });
-                  }
+                  setState(() {
+                    startingPoint = details.globalPosition;
+                  });
                 },
                 onPanUpdate: (details) {
                   setState(() {
-                    if (strokeType == StrokeType.pen) {
-                      currentPenPath.add(details.globalPosition);
-                    } else if (strokeType == StrokeType.rectangle) {
-                      currentRectangle = Rect.fromPoints(
-                          startingPoint!, details.globalPosition);
+                    switch (strokeType) {
+                      case StrokeType.pen:
+                        currentPenPath.add(details.globalPosition);
+                        break;
+                      case StrokeType.rectangle:
+                        currentRectangle = Rect.fromPoints(
+                            startingPoint!, details.globalPosition);
+                        break;
+                      case StrokeType.line:
+                        currentLine = LineObject(
+                          startingPoint!,
+                          details.globalPosition,
+                          boardContent.strokeWidth,
+                          boardContent.brushColor,
+                        );
+                        break;
                     }
                   });
                 },
                 onPanEnd: (details) {
-                  if (strokeType == StrokeType.pen) {
-                    setState(() {
-                      savedDrawObjects.add(PenObject(
-                        currentPenPath,
-                        boardContent.strokeWidth,
-                        boardContent.brushColor,
-                      ));
-                      currentPenPath = [];
-                    });
-                  } else if (strokeType == StrokeType.rectangle) {
-                    setState(() {
-                      savedDrawObjects.add(RectangleObject(
-                        currentRectangle!,
-                        boardContent.strokeWidth,
-                        boardContent.brushColor,
-                      ));
-                      currentRectangle = null;
-                    });
+                  switch (strokeType) {
+                    case StrokeType.pen:
+                      setState(() {
+                        savedDrawObjects.add(PenObject(
+                          currentPenPath,
+                          boardContent.strokeWidth,
+                          boardContent.brushColor,
+                        ));
+                        currentPenPath = [];
+                      });
+                      break;
+                    case StrokeType.rectangle:
+                      setState(() {
+                        savedDrawObjects.add(RectangleObject(
+                          currentRectangle!,
+                          boardContent.strokeWidth,
+                          boardContent.brushColor,
+                        ));
+                        currentRectangle = null;
+                      });
+                      break;
+                    case StrokeType.line:
+                      setState(() {
+                        savedDrawObjects.add(currentLine!);
+                        currentLine = null;
+                      });
+                      break;
                   }
                 },
                 child: CustomPaint(
