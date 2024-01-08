@@ -13,6 +13,7 @@ enum StrokeType {
   pen(Icons.edit),
   line(Icons.remove),
   circle(Icons.circle_outlined),
+  oval(Icons.circle_outlined),
   rectangle(Icons.crop_square);
 
   final IconData icon;
@@ -29,6 +30,7 @@ class BoardWidget extends ConsumerStatefulWidget {
 
 class _BoardWidgetState extends ConsumerState<BoardWidget> {
   Rect? currentRectangle;
+  Rect? currentOvalRectangle;
   Offset? startingPoint;
   LineObject? currentLine;
   CircleObject? currentCircle;
@@ -47,6 +49,12 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
         if (currentRectangle != null)
           RectangleObject(
             currentRectangle!,
+            ref.read(boardContentProvider).strokeWidth,
+            ref.read(boardContentProvider).brushColor,
+          ),
+        if (currentOvalRectangle != null)
+          OvalObject(
+            currentOvalRectangle!,
             ref.read(boardContentProvider).strokeWidth,
             ref.read(boardContentProvider).brushColor,
           ),
@@ -79,6 +87,10 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
                         break;
                       case StrokeType.rectangle:
                         currentRectangle = Rect.fromPoints(
+                            startingPoint!, details.globalPosition);
+                        break;
+                      case StrokeType.oval:
+                        currentOvalRectangle = Rect.fromPoints(
                             startingPoint!, details.globalPosition);
                         break;
                       case StrokeType.line:
@@ -129,6 +141,16 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
                           boardContent.brushColor,
                         ));
                         currentRectangle = null;
+                      });
+                      break;
+                    case StrokeType.oval:
+                      setState(() {
+                        savedDrawObjects.add(OvalObject(
+                          currentOvalRectangle!,
+                          boardContent.strokeWidth,
+                          boardContent.brushColor,
+                        ));
+                        currentOvalRectangle = null;
                       });
                       break;
                     case StrokeType.line:

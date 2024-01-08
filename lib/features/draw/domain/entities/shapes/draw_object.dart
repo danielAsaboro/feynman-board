@@ -33,6 +33,13 @@ class RectangleObject extends DrawObject {
       : super(strokeWidth, color);
 }
 
+class OvalObject extends DrawObject {
+  final Rect rect;
+
+  OvalObject(this.rect, double strokeWidth, Color color)
+      : super(strokeWidth, color);
+}
+
 class LineObject extends DrawObject {
   final Offset startPoint;
   final Offset endPoint;

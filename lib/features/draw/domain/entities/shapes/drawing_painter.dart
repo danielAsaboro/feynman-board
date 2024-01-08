@@ -30,6 +30,10 @@ class DrawingPainter extends CustomPainter with Brush {
           canvas.drawRect(
               object.rect, getOutlinedPaint(object.color, object.strokeWidth));
           break;
+        case OvalObject():
+          canvas.drawOval(
+              object.rect, getOutlinedPaint(object.color, object.strokeWidth));
+          break;
         case LineObject():
           canvas.drawLine(object.startPoint, object.endPoint,
               getPaint(object.color, object.strokeWidth));
