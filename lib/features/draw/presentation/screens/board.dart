@@ -28,22 +28,25 @@ class BoardWidget extends ConsumerStatefulWidget {
 class _BoardWidgetState extends ConsumerState<BoardWidget> {
   Rect? currentRectangle;
   Offset? startingPoint;
-  List<Offset?> currentLinePath = [];
+  List<Offset?> currentPenPath = [];
 
   List<DrawObject> savedDrawObjects = [];
 
-  List<DrawObject> get objectsToDraw => [    ...savedDrawObjects,
-    if(currentLinePath.isNotEmpty) LineObject(
-      currentLinePath,
-      ref.read(boardContentProvider).strokeWidth,
-      ref.read(boardContentProvider).brushColor,
-    ),
-    if(currentRectangle != null) RectangleObject(
-      currentRectangle!,
-      ref.read(boardContentProvider).strokeWidth,
-      ref.read(boardContentProvider).brushColor,
-    ),
-  ];
+  List<DrawObject> get objectsToDraw => [
+        ...savedDrawObjects,
+        if (currentPenPath.isNotEmpty)
+          PenObject(
+            currentPenPath,
+            ref.read(boardContentProvider).strokeWidth,
+            ref.read(boardContentProvider).brushColor,
+          ),
+        if (currentRectangle != null)
+          RectangleObject(
+            currentRectangle!,
+            ref.read(boardContentProvider).strokeWidth,
+            ref.read(boardContentProvider).brushColor,
+          ),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -66,22 +69,23 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
                 },
                 onPanUpdate: (details) {
                   setState(() {
-                    if(strokeType == StrokeType.pen) {
-                      currentLinePath.add(details.globalPosition);
+                    if (strokeType == StrokeType.pen) {
+                      currentPenPath.add(details.globalPosition);
                     } else if (strokeType == StrokeType.rectangle) {
-                      currentRectangle=  Rect.fromPoints(startingPoint!, details.globalPosition);
+                      currentRectangle = Rect.fromPoints(
+                          startingPoint!, details.globalPosition);
                     }
                   });
                 },
                 onPanEnd: (details) {
-                  if(strokeType == StrokeType.pen) {
+                  if (strokeType == StrokeType.pen) {
                     setState(() {
-                      savedDrawObjects.add(LineObject(
-                        currentLinePath,
+                      savedDrawObjects.add(PenObject(
+                        currentPenPath,
                         boardContent.strokeWidth,
                         boardContent.brushColor,
                       ));
-                      currentLinePath = [];
+                      currentPenPath = [];
                     });
                   } else if (strokeType == StrokeType.rectangle) {
                     setState(() {
@@ -93,12 +97,9 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
                       currentRectangle = null;
                     });
                   }
-
                 },
                 child: CustomPaint(
-                  painter: DrawingPainter(
-                    objectsToDraw
-                  ),
+                  painter: DrawingPainter(objectsToDraw),
                 ),
               ),
             ),

@@ -12,9 +12,9 @@ class DrawingPainter extends CustomPainter with Brush {
 
   @override
   void paint(Canvas canvas, Size size) {
-    for(DrawObject object in objects) {
-      switch(object){
-        case LineObject():
+    for (DrawObject object in objects) {
+      switch (object) {
+        case PenObject():
           final points = object.points;
           for (int i = 0; i < points.length - 1; i++) {
             if (points[i] != null && points[i + 1] != null) {
@@ -26,8 +26,9 @@ class DrawingPainter extends CustomPainter with Brush {
             }
           }
           break;
-          case RectangleObject():
-            canvas.drawRect(object.rect, getRectPaint(object.color, object.strokeWidth));
+        case RectangleObject():
+          canvas.drawRect(
+              object.rect, getRectPaint(object.color, object.strokeWidth));
           break;
       }
     }
