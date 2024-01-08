@@ -1,3 +1,4 @@
+import 'package:feynman_board/features/draw/domain/enums/shape_type.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -24,6 +25,11 @@ class BoardControllerNotifier extends Notifier<BoardContent> {
     state = state.copyWith(oldScribbles: updatedScribbles);
   }
 
+  void changeShape(ShapeType shape) {
+    state = state.copyWith(shape: shape);
+    print("new shape: ${state.shape}");
+  }
+
   void changeStrokeWidth(double width) {
     state = state.copyWith(strokeWidth: width);
   }
@@ -39,29 +45,29 @@ class BoardControllerNotifier extends Notifier<BoardContent> {
 
   void saveCurrentState() {
     state = state.copyWith(
-      previouslySavedScribbles: [...state.oldScribbles],
+      lastSavedScribbles: [...state.oldScribbles],
       currentScribbles: [...state.currentScribbles],
     );
 
     // starting to use loops
-    final allLastSavedState = [
-      ...state.allLastSavedState,
+    final savedScribbleStatesHistory = [
+      ...state.savedScribbleStatesHistory,
     ];
-    allLastSavedState.add([...state.previouslySavedScribbles]);
+    savedScribbleStatesHistory.add([...state.lastSavedScribbles]);
     state = state.copyWith(
-      allLastSavedState: allLastSavedState,
+      savedScribbleStatesHistory: savedScribbleStatesHistory,
       currentScribbles: [...state.currentScribbles],
     );
   }
 
   void undoMove() {
-    final allLastSavedState = state.allLastSavedState;
+    final allLastSavedState = state.savedScribbleStatesHistory;
     final allLastSavedStateLength = allLastSavedState.length;
 
     if (allLastSavedState.isNotEmpty) {
       state = state.copyWith(oldScribbles: allLastSavedState.last);
       allLastSavedState.removeAt(allLastSavedStateLength - 1);
-      state = state.copyWith(allLastSavedState: allLastSavedState);
+      state = state.copyWith(savedScribbleStatesHistory: allLastSavedState);
     }
   }
 }

@@ -1,10 +1,10 @@
-import 'package:feynman_board/features/draw/domain/entities/board.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/shapes/draw_object.dart';
-import '../../domain/entities/shapes/drawing_painter.dart';
+import '../../domain/entities/shapes/doodle.dart';
 import '../components/color_palette_store.dart';
+import '../components/shape_selector.dart';
 import '../components/stroke_pallet_store.dart';
 import '../components/undo_button.dart';
 import '../controllers/board_controller.dart';
@@ -32,11 +32,11 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
                   RenderBox renderBox = context.findRenderObject() as RenderBox;
                   final offset =
                       renderBox.globalToLocal(details.globalPosition);
-
                   final newScribble = DrawObject(
                     offset,
                     boardContent.strokeWidth,
                     boardContent.brushColor,
+                    boardContent.shape,
                   );
                   ref
                       .read(boardContentProvider.notifier)
@@ -49,16 +49,22 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
                       .allCurrentScribblesToAllScribbles();
                 },
                 child: CustomPaint(
-                  painter: DrawingPainter(boardContent.allScribbles),
+                  painter: Doodle(boardContent.allScribbles),
                 ),
               ),
             ),
+            ShapePalletteStore(ref: ref),
             Positioned(
               bottom: 12,
               left: 12,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const Text("Shape ",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      )),
                   const Text("Stroke Width",
                       style: TextStyle(
                         fontSize: 14,
