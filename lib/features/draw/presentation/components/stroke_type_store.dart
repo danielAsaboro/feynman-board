@@ -12,7 +12,7 @@ class StrokeTypeStore extends StatelessWidget {
     required this.ref,
   });
 
-  final BoardContent boardContent;
+  final BoardConfig boardContent;
   final WidgetRef ref;
 
   @override
