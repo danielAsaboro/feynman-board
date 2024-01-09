@@ -1,8 +1,9 @@
 Critical Features:
 
 1. Hold Shift for straight line and a Circle
-2.
-
+2. Add Curved edges to rectangles like ecalidraw
+3. Better icons for shapes
+4. Hook up to some database so drawings aren't lost
 
 Nice to have Features:
 
