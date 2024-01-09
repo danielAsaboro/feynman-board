@@ -11,6 +11,9 @@ import '../controllers/board_controller.dart';
 
 enum StrokeType {
   pen(Icons.edit),
+  line(Icons.remove),
+  circle(Icons.circle_outlined),
+  oval(Icons.circle_outlined),
   rectangle(Icons.crop_square);
 
   final IconData icon;
@@ -27,23 +30,37 @@ class BoardWidget extends ConsumerStatefulWidget {
 
 class _BoardWidgetState extends ConsumerState<BoardWidget> {
   Rect? currentRectangle;
+  Rect? currentOvalRectangle;
   Offset? startingPoint;
-  List<Offset?> currentLinePath = [];
+  LineObject? currentLine;
+  CircleObject? currentCircle;
+  List<Offset?> currentPenPath = [];
 
   List<DrawObject> savedDrawObjects = [];
 
-  List<DrawObject> get objectsToDraw => [    ...savedDrawObjects,
-    if(currentLinePath.isNotEmpty) LineObject(
-      currentLinePath,
-      ref.read(boardContentProvider).strokeWidth,
-      ref.read(boardContentProvider).brushColor,
-    ),
-    if(currentRectangle != null) RectangleObject(
-      currentRectangle!,
-      ref.read(boardContentProvider).strokeWidth,
-      ref.read(boardContentProvider).brushColor,
-    ),
-  ];
+  List<DrawObject> get objectsToDraw => [
+        ...savedDrawObjects,
+        if (currentPenPath.isNotEmpty)
+          PenObject(
+            currentPenPath,
+            ref.read(boardContentProvider).strokeWidth,
+            ref.read(boardContentProvider).brushColor,
+          ),
+        if (currentRectangle != null)
+          RectangleObject(
+            currentRectangle!,
+            ref.read(boardContentProvider).strokeWidth,
+            ref.read(boardContentProvider).brushColor,
+          ),
+        if (currentOvalRectangle != null)
+          OvalObject(
+            currentOvalRectangle!,
+            ref.read(boardContentProvider).strokeWidth,
+            ref.read(boardContentProvider).brushColor,
+          ),
+        if (currentLine != null) currentLine!,
+        if (currentCircle != null) currentCircle!,
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -58,47 +75,99 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
             Positioned.fill(
               child: GestureDetector(
                 onPanDown: (details) {
-                  if (strokeType == StrokeType.rectangle) {
-                    setState(() {
-                      startingPoint = details.globalPosition;
-                    });
-                  }
+                  setState(() {
+                    startingPoint = details.globalPosition;
+                  });
                 },
                 onPanUpdate: (details) {
                   setState(() {
-                    if(strokeType == StrokeType.pen) {
-                      currentLinePath.add(details.globalPosition);
-                    } else if (strokeType == StrokeType.rectangle) {
-                      currentRectangle=  Rect.fromPoints(startingPoint!, details.globalPosition);
+                    switch (strokeType) {
+                      case StrokeType.pen:
+                        currentPenPath.add(details.globalPosition);
+                        break;
+                      case StrokeType.rectangle:
+                        currentRectangle = Rect.fromPoints(
+                            startingPoint!, details.globalPosition);
+                        break;
+                      case StrokeType.oval:
+                        currentOvalRectangle = Rect.fromPoints(
+                            startingPoint!, details.globalPosition);
+                        break;
+                      case StrokeType.line:
+                        currentLine = LineObject(
+                          startingPoint!,
+                          details.globalPosition,
+                          boardContent.strokeWidth,
+                          boardContent.brushColor,
+                        );
+                        break;
+                      case StrokeType.circle:
+                        // calculate center offset between starting point and current point
+                        final center = Offset(
+                          (startingPoint!.dx + details.globalPosition.dx) / 2,
+                          (startingPoint!.dy + details.globalPosition.dy) / 2,
+                        );
+                        // calculate radius
+                        final radius =
+                            (center - details.globalPosition).distance;
+
+                        currentCircle = CircleObject(
+                          center,
+                          radius,
+                          boardContent.strokeWidth,
+                          boardContent.brushColor,
+                        );
+                        break;
                     }
                   });
                 },
                 onPanEnd: (details) {
-                  if(strokeType == StrokeType.pen) {
-                    setState(() {
-                      savedDrawObjects.add(LineObject(
-                        currentLinePath,
-                        boardContent.strokeWidth,
-                        boardContent.brushColor,
-                      ));
-                      currentLinePath = [];
-                    });
-                  } else if (strokeType == StrokeType.rectangle) {
-                    setState(() {
-                      savedDrawObjects.add(RectangleObject(
-                        currentRectangle!,
-                        boardContent.strokeWidth,
-                        boardContent.brushColor,
-                      ));
-                      currentRectangle = null;
-                    });
+                  switch (strokeType) {
+                    case StrokeType.pen:
+                      setState(() {
+                        savedDrawObjects.add(PenObject(
+                          currentPenPath,
+                          boardContent.strokeWidth,
+                          boardContent.brushColor,
+                        ));
+                        currentPenPath = [];
+                      });
+                      break;
+                    case StrokeType.rectangle:
+                      setState(() {
+                        savedDrawObjects.add(RectangleObject(
+                          currentRectangle!,
+                          boardContent.strokeWidth,
+                          boardContent.brushColor,
+                        ));
+                        currentRectangle = null;
+                      });
+                      break;
+                    case StrokeType.oval:
+                      setState(() {
+                        savedDrawObjects.add(OvalObject(
+                          currentOvalRectangle!,
+                          boardContent.strokeWidth,
+                          boardContent.brushColor,
+                        ));
+                        currentOvalRectangle = null;
+                      });
+                      break;
+                    case StrokeType.line:
+                      setState(() {
+                        savedDrawObjects.add(currentLine!);
+                        currentLine = null;
+                      });
+                      break;
+                    case StrokeType.circle:
+                      setState(() {
+                        savedDrawObjects.add(currentCircle!);
+                        currentCircle = null;
+                      });
                   }
-
                 },
                 child: CustomPaint(
-                  painter: DrawingPainter(
-                    objectsToDraw
-                  ),
+                  painter: DrawingPainter(objectsToDraw),
                 ),
               ),
             ),

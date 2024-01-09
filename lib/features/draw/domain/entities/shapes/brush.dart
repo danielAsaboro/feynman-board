@@ -8,7 +8,7 @@ mixin Brush {
       ..strokeWidth = strokeWidth;
   }
 
-  Paint getRectPaint(Color color, double strokeWidth) {
+  Paint getOutlinedPaint(Color color, double strokeWidth) {
     return Paint()
       ..color = color
       ..strokeWidth = strokeWidth

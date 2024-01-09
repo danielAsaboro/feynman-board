@@ -7,17 +7,18 @@ sealed class DrawObject {
   DrawObject(this.strokeWidth, this.color);
 }
 
-class LineObject extends DrawObject {
+class PenObject extends DrawObject {
   final List<Offset?> points;
 
-  LineObject(this.points, double strokeWidth, Color color) : super(strokeWidth, color);
+  PenObject(this.points, double strokeWidth, Color color)
+      : super(strokeWidth, color);
 
-  LineObject copyWith({
+  PenObject copyWith({
     List<Offset?>? points,
     double? strokeWidth,
     Color? color,
   }) {
-    return LineObject(
+    return PenObject(
       points ?? this.points,
       strokeWidth ?? this.strokeWidth,
       color ?? this.color,
@@ -28,5 +29,29 @@ class LineObject extends DrawObject {
 class RectangleObject extends DrawObject {
   final Rect rect;
 
-  RectangleObject(this.rect, double strokeWidth, Color color) : super(strokeWidth, color);
+  RectangleObject(this.rect, double strokeWidth, Color color)
+      : super(strokeWidth, color);
+}
+
+class OvalObject extends DrawObject {
+  final Rect rect;
+
+  OvalObject(this.rect, double strokeWidth, Color color)
+      : super(strokeWidth, color);
+}
+
+class LineObject extends DrawObject {
+  final Offset startPoint;
+  final Offset endPoint;
+
+  LineObject(this.startPoint, this.endPoint, double strokeWidth, Color color)
+      : super(strokeWidth, color);
+}
+
+class CircleObject extends DrawObject {
+  final Offset center;
+  final double radius;
+
+  CircleObject(this.center, this.radius, double strokeWidth, Color color)
+      : super(strokeWidth, color);
 }
