@@ -54,7 +54,6 @@ class BoardContentControllerNotifier extends Notifier<BoardContent> {
       ref.read(boardConfigProvider).strokeWidth,
       ref.read(boardConfigProvider).brushColor,
     );
-    print(currentLine);
     state = state.copyWith(
         boardConfig: ref.read(boardConfigProvider), currentLine: currentLine);
   }
@@ -102,8 +101,6 @@ class BoardContentControllerNotifier extends Notifier<BoardContent> {
           ref.read(boardConfigProvider).strokeWidth,
           ref.read(boardConfigProvider).brushColor,
         ));
-        print("rectangle added");
-        print(savedDrawObjects);
         state = state.copyWith(
           boardConfig: ref.read(boardConfigProvider),
           currentRectangle: null,
@@ -118,7 +115,6 @@ class BoardContentControllerNotifier extends Notifier<BoardContent> {
         ));
         state = state.copyWith(
           boardConfig: ref.read(boardConfigProvider),
-          // currentOvalRectangle: null,
           savedDrawObjects: savedDrawObjects,
         );
         break;
@@ -126,7 +122,6 @@ class BoardContentControllerNotifier extends Notifier<BoardContent> {
         savedDrawObjects.add(state.currentLine!);
         state = state.copyWith(
           boardConfig: ref.read(boardConfigProvider),
-          // currentLine: null,
           savedDrawObjects: savedDrawObjects,
         );
         break;
@@ -134,7 +129,6 @@ class BoardContentControllerNotifier extends Notifier<BoardContent> {
         savedDrawObjects.add(state.currentCircle!);
         state = state.copyWith(
           boardConfig: ref.read(boardConfigProvider),
-          // currentCircle: null,
           savedDrawObjects: savedDrawObjects,
         );
     }
@@ -152,8 +146,6 @@ class BoardContentControllerNotifier extends Notifier<BoardContent> {
     final savedScribbleStatesHistory = [
       ...state.savedDrawObjectStatesHistory,
     ];
-    print("printing current board");
-    print(state.savedDrawObjects);
     savedScribbleStatesHistory.add([...state.savedDrawObjects]);
     state = state.copyWith(
       boardConfig: ref.read(boardConfigProvider),
@@ -168,8 +160,6 @@ class BoardContentControllerNotifier extends Notifier<BoardContent> {
 
   void undoMove() {
     final allLastSavedState = [...state.savedDrawObjectStatesHistory];
-    print("printing last saved state");
-    print(allLastSavedState);
     final allLastSavedStateLength = allLastSavedState.length;
 
     if (allLastSavedState.isNotEmpty) {
