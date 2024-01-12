@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/board_config.dart';
-import '../controllers/board_config_controller.dart';
+import '../controllers/board_config.dart';
 
 class StrokePalletteStore extends StatelessWidget {
   const StrokePalletteStore({
     super.key,
-    required this.boardContent,
+    required this.boardConfig,
     required this.ref,
   });
 
-  final BoardConfig boardContent;
+  final BoardConfig boardConfig;
   final WidgetRef ref;
 
   @override
@@ -19,8 +19,8 @@ class StrokePalletteStore extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        ...boardContent.supportedStrokeWidth.map((strokeWidth) {
-          final isSelected = boardContent.strokeWidth == strokeWidth;
+        ...boardConfig.supportedStrokeWidth.map((strokeWidth) {
+          final isSelected = boardConfig.strokeWidth == strokeWidth;
           return InkWell(
             onTap: () {
               ref

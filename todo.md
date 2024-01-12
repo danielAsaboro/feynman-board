@@ -1,20 +1,9 @@
 ⚠️⚠️ Critical Features:
 
-✒️ Drawing Tools:
-
-Hold Shift for straight line and circle
-Eraser Tool
-Panning the Canvas
-Nice to Have Features:
-
-👥 User Interface:
-
-Move the tool bar to sidebar (like ExcaliDraw)
-Shapes section at the center top of the screen
-Zoom on the bottom left
-Undo and Revert options on the side
-Help button displaying a list of commands on the side
-
+1. Hold Shift for straight line and a Circle
+2. Add Curved edges to rectangles like excalidraw
+3. Better icons for shapes
+4. Hook up to some database so drawings aren't lost
 
 🫡🫡 Advanced Features:
 

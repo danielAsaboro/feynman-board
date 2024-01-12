@@ -10,9 +10,8 @@ class BoardConfigControllerNotifier extends Notifier<BoardConfig> {
     return BoardConfig();
   }
 
-  void changeShape(ScribbleType shape) {
-    state = state.copyWith(shape: shape);
-    print("new shape: ${state.shape}");
+  void changeShapeType(ShapeType strokeType) {
+    state = state.copyWith(shapeType: strokeType);
   }
 
   void changeStrokeWidth(double width) {

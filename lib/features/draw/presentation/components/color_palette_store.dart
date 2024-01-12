@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/board_config.dart';
-import '../controllers/board_config_controller.dart';
+import '../controllers/board_config.dart';
 
 class ColorPaletteStore extends StatelessWidget {
   const ColorPaletteStore({

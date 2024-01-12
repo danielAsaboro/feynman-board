@@ -1,65 +1,86 @@
+import 'package:feynman_board/features/draw/domain/entities/board_config.dart';
 import 'package:flutter/material.dart';
 
 import 'shapes/draw_object.dart';
 
 class BoardContent {
-  late final List<Scribble> oldScribbles;
-  late final List<Offset?> currentScribbles;
-  late final List<List<Scribble>?> savedScribbleStatesHistory;
-  late final Offset? startPoint;
-  late final Offset? stopPoint;
-  late final Rectangle? rectangle;
-  late final Color brushColor;
-  late final double strokeWidth;
+  late final Rect? currentRectangle;
+  late final Rect? currentOvalRectangle;
+  late final Offset? startingPoint;
+  late final LineObject? currentLine;
+  late final CircleObject? currentCircle;
+  late final List<Offset?> currentPenPath;
 
-  List<Scribble> get allScribbles => [
-        if (oldScribbles.isNotEmpty) ...oldScribbles,
-        if (currentScribbles.isNotEmpty)
-          Line(currentScribbles, strokeWidth, brushColor),
-        if (rectangle != null) rectangle!,
+  late final BoardConfig _boardConfig;
+
+  late final List<DrawObject> savedDrawObjects;
+  late final List<List<DrawObject>?> savedDrawObjectStatesHistory;
+
+  List<DrawObject> get objectsToDraw => [
+        ...savedDrawObjects,
+        if (currentPenPath.isNotEmpty)
+          PenObject(
+            currentPenPath,
+            _boardConfig.strokeWidth,
+            _boardConfig.brushColor,
+          ),
+        if (currentRectangle != null)
+          RectangleObject(
+            currentRectangle!,
+            _boardConfig.strokeWidth,
+            _boardConfig.brushColor,
+          ),
+        if (currentOvalRectangle != null)
+          OvalObject(
+            currentOvalRectangle!,
+            _boardConfig.strokeWidth,
+            _boardConfig.brushColor,
+          ),
+        if (currentLine != null) currentLine!,
+        if (currentCircle != null) currentCircle!,
       ];
 
   BoardContent({
-    List<Scribble>? oldScribbles,
-    List<Offset?>? currentScribbles,
-    List<List<Scribble>?>? savedScribbleStatesHistory,
-    Offset? startPosition,
-    Offset? stopPosition,
-    Rectangle? rectangle,
-    Color? brushColor,
-    double? strokeWidth,
+    required boardConfig,
+    List<DrawObject>? savedDrawObjects,
+    List<List<DrawObject>?>? savedDrawObjectStatesHistory,
+    List<Offset?>? currentPenPath,
+    this.currentRectangle,
+    this.currentOvalRectangle,
+    this.startingPoint,
+    this.currentLine,
+    this.currentCircle,
   }) {
-    this.oldScribbles = oldScribbles ?? [];
-    this.currentScribbles = currentScribbles ?? [];
-    this.savedScribbleStatesHistory = savedScribbleStatesHistory ?? [];
-    this.startPoint = startPosition;
-    this.stopPoint = stopPosition;
-    this.rectangle = rectangle;
-    this.brushColor = brushColor ?? Colors.black;
-    this.strokeWidth = strokeWidth ?? 5;
+    this.savedDrawObjects = savedDrawObjects ?? [];
+    this.savedDrawObjectStatesHistory = savedDrawObjectStatesHistory ?? [];
+    this.currentPenPath = currentPenPath ?? [];
+    _boardConfig = boardConfig;
   }
 
   BoardContent copyWith({
-    List<Scribble>? oldScribbles,
-    List<Offset?>? currentScribbles,
-    List<List<Scribble>?>? savedScribbleStatesHistory,
+    List<DrawObject>? savedDrawObjects,
+    List<List<DrawObject>?>? savedDrawObjectStatesHistory,
     Offset? startPosition,
     Offset? stopPosition,
-    Rectangle? rectangle,
-    Color? brushColor,
-    double? strokeWidth,
+    required BoardConfig boardConfig,
+    List<Offset?>? currentPenPath,
+    Rect? currentRectangle,
+    Rect? currentOvalRectangle,
+    Offset? startingPoint,
+    LineObject? currentLine,
+    CircleObject? currentCircle,
   }) {
     return BoardContent(
-      oldScribbles: oldScribbles ?? List.from(this.oldScribbles),
-      currentScribbles: currentScribbles ?? [],
-      savedScribbleStatesHistory: savedScribbleStatesHistory ??
-          List.from(this.savedScribbleStatesHistory),
-      startPosition:
-          startPosition ?? ((stopPosition != null) ? this.startPoint : null),
-      stopPosition: stopPosition,
-      rectangle: rectangle,
-      brushColor: brushColor ?? this.brushColor,
-      strokeWidth: strokeWidth ?? this.strokeWidth,
+      boardConfig: boardConfig,
+      savedDrawObjects: savedDrawObjects ?? this.savedDrawObjects,
+      savedDrawObjectStatesHistory: savedDrawObjectStatesHistory ??
+          List.from(this.savedDrawObjectStatesHistory),
+      startingPoint: startPosition ?? this.startingPoint,
+      currentPenPath: currentPenPath,
+      currentRectangle: currentRectangle,
+      currentCircle: currentCircle,
+      currentLine: currentLine,
+      currentOvalRectangle: currentOvalRectangle,
     );
   }
 }

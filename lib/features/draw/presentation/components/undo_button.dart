@@ -1,22 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../controllers/board_content.dart';
 
 class UndoChangesButton extends StatelessWidget {
   const UndoChangesButton({
     super.key,
-    required this.ref,
+    required this.onPressed,
   });
 
-  final WidgetRef ref;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        ref.read(boardContentProvider.notifier).undoMove();
-      },
+      onTap: onPressed,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

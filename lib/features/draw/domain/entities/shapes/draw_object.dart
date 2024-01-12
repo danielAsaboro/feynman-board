@@ -1,49 +1,94 @@
 import 'dart:ui';
 
-sealed class Scribble {
+import 'package:feynman_board/features/draw/domain/entities/shapes/brush.dart';
+
+sealed class DrawObject with Brush {
   final double strokeWidth;
   final Color color;
 
-  Scribble(
-    this.strokeWidth,
-    this.color,
-  );
+  DrawObject(this.strokeWidth, this.color);
+
+  void paint(Canvas canvas);
 }
 
-class Doodle extends Scribble {
+class PenObject extends DrawObject {
   final List<Offset?> points;
 
-  Doodle(this.points, double strokeWidth, Color color)
-      : super(strokeWidth, color);
-}
-
-class Line extends Scribble {
-  final List<Offset?> points;
-
-  Line(this.points, double strokeWidth, Color color)
+  PenObject(this.points, double strokeWidth, Color color)
       : super(strokeWidth, color);
 
-  Line copyWith({
+  PenObject copyWith({
     List<Offset?>? points,
     double? strokeWidth,
     Color? color,
   }) {
-    return Line(
+    return PenObject(
       points ?? this.points,
       strokeWidth ?? this.strokeWidth,
       color ?? this.color,
     );
   }
+
+  @override
+  void paint(Canvas canvas) {
+    for (int i = 0; i < points.length - 1; i++) {
+      if (points[i] != null && points[i + 1] != null) {
+        canvas.drawLine(
+            points[i]!, points[i + 1]!, getPaint(color, strokeWidth));
+      } else if (points[i] != null && points[i + 1] == null) {
+        canvas.drawPoints(
+            PointMode.points, [points[i]!], getPaint(color, strokeWidth));
+      }
+    }
+  }
 }
 
-class Rectangle extends Scribble {
-  final Offset startPoint;
+class RectangleObject extends DrawObject {
   final Rect rect;
 
-  Rectangle(
-    this.startPoint,
-    this.rect,
-    double strokeWidth,
-    Color color,
-  ) : super(strokeWidth, color);
+  RectangleObject(this.rect, double strokeWidth, Color color)
+      : super(strokeWidth, color);
+
+  @override
+  void paint(Canvas canvas) {
+    canvas.drawRect(rect, getOutlinedPaint(color, strokeWidth));
+  }
+}
+
+class OvalObject extends DrawObject {
+  final Rect rect;
+
+  OvalObject(this.rect, double strokeWidth, Color color)
+      : super(strokeWidth, color);
+
+  @override
+  void paint(Canvas canvas) {
+    canvas.drawOval(rect, getOutlinedPaint(color, strokeWidth));
+  }
+}
+
+class LineObject extends DrawObject {
+  final Offset startPoint;
+  final Offset endPoint;
+
+  LineObject(this.startPoint, this.endPoint, double strokeWidth, Color color)
+      : super(strokeWidth, color);
+
+  @override
+  void paint(Canvas canvas) {
+    canvas.drawLine(startPoint, endPoint, getPaint(color, strokeWidth));
+  }
+}
+
+class CircleObject extends DrawObject {
+  final Offset center;
+  final double radius;
+
+  CircleObject(this.center, this.radius, double strokeWidth, Color color)
+      : super(strokeWidth, color);
+
+  @override
+  void paint(Canvas canvas) {
+    canvas.drawCircle(center, radius, getOutlinedPaint(color, strokeWidth));
+  }
 }

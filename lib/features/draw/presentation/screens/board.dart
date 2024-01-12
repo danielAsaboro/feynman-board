@@ -1,14 +1,13 @@
+import 'package:feynman_board/features/draw/presentation/components/stroke_type_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../domain/entities/shapes/draw_object.dart';
 import '../../domain/entities/shapes/drawing_painter.dart';
 import '../../domain/enums/shape_type.dart';
 import '../components/color_palette_store.dart';
-import '../components/shape_selector.dart';
 import '../components/stroke_pallet_store.dart';
 import '../components/undo_button.dart';
-import '../controllers/board_config_controller.dart';
+import '../controllers/board_config.dart';
 import '../controllers/board_content.dart';
 
 class BoardWidget extends ConsumerStatefulWidget {
@@ -23,6 +22,7 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
   Widget build(BuildContext context) {
     final boardConfig = ref.watch(boardConfigProvider);
     final boardContent = ref.watch(boardContentProvider);
+    final strokeType = boardConfig.shapeType;
     return Scaffold(
       body: SizedBox(
         width: double.infinity,
@@ -32,75 +32,71 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
             Positioned.fill(
               child: GestureDetector(
                 onPanDown: (details) {
-                  if (boardConfig.shape == ScribbleType.rectangle) {
-                    ref
-                        .read(boardContentProvider.notifier)
-                        .addRectangleStartPoint(details.globalPosition);
-                  }
+                  final startingPoint = details.globalPosition;
+                  ref
+                      .read(boardContentProvider.notifier)
+                      .addStartingPoint(startingPoint);
                 },
                 onPanUpdate: (details) {
-                  RenderBox renderBox = context.findRenderObject() as RenderBox;
-                  final offset =
-                      renderBox.globalToLocal(details.globalPosition);
-                  switch (boardConfig.shape) {
-                    case ScribbleType.doodle:
+                  final currentPoint = details.globalPosition;
+                  switch (strokeType) {
+                    case ShapeType.pen:
                       ref
                           .read(boardContentProvider.notifier)
-                          .addToCurrentScribbles(offset);
+                          .addScribbleToCurrentPenPath(currentPoint);
                       break;
-                    case ScribbleType.rectangle:
+                    case ShapeType.rectangle:
                       ref
                           .read(boardContentProvider.notifier)
-                          .addRectangleToCurrentScribbles(offset);
+                          .addScribbleToCurrentRectangle(currentPoint);
                       break;
-                    default:
+                    case ShapeType.oval:
+                      ref
+                          .read(boardContentProvider.notifier)
+                          .addScribbleToCurrentOval(currentPoint);
+                      break;
+                    case ShapeType.line:
+                      ref
+                          .read(boardContentProvider.notifier)
+                          .addScribbleToCurrentLine(currentPoint);
+                      break;
+                    case ShapeType.circle:
+                      ref
+                          .read(boardContentProvider.notifier)
+                          .addScribbleToCurrentCircle(currentPoint);
+                      break;
                   }
-
-                  //   if (strokeType == StrokeType.pen) {
-                  //   currentLinePath.add(details.globalPosition);
-                  // } else if (strokeType == StrokeType.rectangle) {
-                  //   currentRectangle =
-                  //       Rect.fromPoints(startingPoint!, details.globalPosition);
-                  // }
                 },
                 onPanEnd: (details) {
-                  switch (boardConfig.shape) {
-                    case ScribbleType.doodle:
-                      ref
-                          .read(boardContentProvider.notifier)
-                          .addCurrentDoddleToAllScribbles();
-                      break;
-                    case ScribbleType.rectangle:
-                      ref
-                          .read(boardContentProvider.notifier)
-                          .addRectangleToAllScribbles();
-                      break;
-                    default:
-                  }
+                  ref
+                      .read(boardContentProvider.notifier)
+                      .addShapeToAllScribbles();
                 },
                 child: CustomPaint(
-                  painter: DrawingPainter(boardContent.allScribbles),
+                  painter: DrawingPainter(boardContent.objectsToDraw),
                 ),
               ),
             ),
-            ShapePalletteStore(ref: ref),
+            // ShapePalletteStore(ref: ref),
             Positioned(
               bottom: 12,
               left: 12,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("Shape ",
+                  const Text("Type",
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       )),
+                  StrokeTypeStore(boardConfig: boardConfig, ref: ref),
+                  const SizedBox(height: 12),
                   const Text("Stroke Width",
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       )),
-                  StrokePalletteStore(boardContent: boardConfig, ref: ref),
+                  StrokePalletteStore(boardConfig: boardConfig, ref: ref),
                   const SizedBox(height: 12),
                   const Text("Color",
                       style: TextStyle(
@@ -114,7 +110,11 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
             Positioned(
               top: 12,
               left: 12,
-              child: UndoChangesButton(ref: ref),
+              child: UndoChangesButton(
+                onPressed: () {
+                  ref.read(boardContentProvider.notifier).undoMove();
+                },
+              ),
             ),
           ],
         ),
