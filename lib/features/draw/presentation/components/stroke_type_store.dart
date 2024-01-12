@@ -1,30 +1,28 @@
-import 'package:feynman_board/features/draw/presentation/screens/board.dart';
+import 'package:feynman_board/features/draw/presentation/controllers/board_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../domain/entities/board.dart';
-import '../controllers/board_controller.dart';
+import '../../domain/entities/board_config.dart';
+import '../../domain/enums/shape_type.dart';
 
 class StrokeTypeStore extends StatelessWidget {
   const StrokeTypeStore({
     super.key,
-    required this.boardContent,
+    required this.boardConfig,
     required this.ref,
   });
 
-  final BoardConfig boardContent;
+  final BoardConfig boardConfig;
   final WidgetRef ref;
 
   @override
   Widget build(BuildContext context) {
     return Row(children: [
-      ...StrokeType.values.map((strokeType) {
-        final isSelected = boardContent.strokeType == strokeType;
+      ...ShapeType.values.map((strokeType) {
+        final isSelected = boardConfig.shapeType == strokeType;
         return InkWell(
           onTap: () {
-            ref
-                .read(boardContentProvider.notifier)
-                .changeStrokeType(strokeType);
+            ref.read(boardConfigProvider.notifier).changeShapeType(strokeType);
           },
           child: Container(
             margin: const EdgeInsets.all(5),

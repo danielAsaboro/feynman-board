@@ -1,12 +1,10 @@
-import 'package:feynman_board/features/draw/presentation/screens/board.dart';
+import 'package:feynman_board/features/draw/domain/enums/shape_type.dart';
 import 'package:flutter/material.dart';
-
-import 'shapes/draw_object.dart';
 
 class BoardConfig {
   late final Color brushColor;
   late final double strokeWidth;
-  late final StrokeType strokeType;
+  late final ShapeType shapeType;
 
   List<Color> supportedColors = [
     Colors.red,
@@ -21,27 +19,27 @@ class BoardConfig {
   BoardConfig({
     double? strokeWidth,
     Color? brushColor,
-    StrokeType? strokeType,
-    List<DrawObject>? drawObjectsList,
+    ShapeType? shapeType,
   }) {
     this.strokeWidth = strokeWidth ?? 5;
     this.brushColor = brushColor ?? Colors.black;
-    this.strokeType = strokeType ?? StrokeType.pen;
+    this.shapeType = shapeType ?? ShapeType.pen;
   }
 
   static Rect? currentRectangle;
-  static  Offset? startingPoint;
+  static Offset? startingPoint;
   static List<Offset> currentLinePath = [];
 
   BoardConfig copyWith({
     double? strokeWidth,
     Color? brushColor,
-    StrokeType? strokeType,
+    // ScribbleType? shape,
+    ShapeType? shapeType,
   }) {
     return BoardConfig(
       strokeWidth: strokeWidth ?? this.strokeWidth,
       brushColor: brushColor ?? this.brushColor,
-      strokeType: strokeType ?? this.strokeType,
+      shapeType: shapeType ?? this.shapeType,
     );
   }
 }

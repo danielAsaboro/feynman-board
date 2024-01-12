@@ -1,6 +1,4 @@
-import 'dart:ui';
 
-import 'package:feynman_board/features/draw/domain/entities/shapes/brush.dart';
 import 'package:flutter/material.dart';
 
 import 'draw_object.dart';

@@ -2,24 +2,13 @@ import 'package:feynman_board/features/draw/presentation/components/stroke_type_
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../domain/entities/shapes/draw_object.dart';
 import '../../domain/entities/shapes/drawing_painter.dart';
+import '../../domain/enums/shape_type.dart';
 import '../components/color_palette_store.dart';
 import '../components/stroke_pallet_store.dart';
 import '../components/undo_button.dart';
-import '../controllers/board_controller.dart';
-
-enum StrokeType {
-  pen(Icons.edit),
-  line(Icons.remove),
-  circle(Icons.circle_outlined),
-  oval(Icons.circle_outlined),
-  rectangle(Icons.crop_square);
-
-  final IconData icon;
-
-  const StrokeType(this.icon);
-}
+import '../controllers/board_config.dart';
+import '../controllers/board_content.dart';
 
 class BoardWidget extends ConsumerStatefulWidget {
   const BoardWidget({super.key});
@@ -29,43 +18,11 @@ class BoardWidget extends ConsumerStatefulWidget {
 }
 
 class _BoardWidgetState extends ConsumerState<BoardWidget> {
-  Rect? currentRectangle;
-  Rect? currentOvalRectangle;
-  Offset? startingPoint;
-  LineObject? currentLine;
-  CircleObject? currentCircle;
-  List<Offset?> currentPenPath = [];
-
-  List<DrawObject> savedDrawObjects = [];
-
-  List<DrawObject> get objectsToDraw => [
-        ...savedDrawObjects,
-        if (currentPenPath.isNotEmpty)
-          PenObject(
-            currentPenPath,
-            ref.read(boardContentProvider).strokeWidth,
-            ref.read(boardContentProvider).brushColor,
-          ),
-        if (currentRectangle != null)
-          RectangleObject(
-            currentRectangle!,
-            ref.read(boardContentProvider).strokeWidth,
-            ref.read(boardContentProvider).brushColor,
-          ),
-        if (currentOvalRectangle != null)
-          OvalObject(
-            currentOvalRectangle!,
-            ref.read(boardContentProvider).strokeWidth,
-            ref.read(boardContentProvider).brushColor,
-          ),
-        if (currentLine != null) currentLine!,
-        if (currentCircle != null) currentCircle!,
-      ];
-
   @override
   Widget build(BuildContext context) {
+    final boardConfig = ref.watch(boardConfigProvider);
     final boardContent = ref.watch(boardContentProvider);
-    final strokeType = boardContent.strokeType;
+    final strokeType = boardConfig.shapeType;
     return Scaffold(
       body: SizedBox(
         width: double.infinity,
@@ -75,102 +32,52 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
             Positioned.fill(
               child: GestureDetector(
                 onPanDown: (details) {
-                  setState(() {
-                    startingPoint = details.globalPosition;
-                  });
+                  final startingPoint = details.globalPosition;
+                  ref
+                      .read(boardContentProvider.notifier)
+                      .addStartingPoint(startingPoint);
                 },
                 onPanUpdate: (details) {
-                  setState(() {
-                    switch (strokeType) {
-                      case StrokeType.pen:
-                        currentPenPath.add(details.globalPosition);
-                        break;
-                      case StrokeType.rectangle:
-                        currentRectangle = Rect.fromPoints(
-                            startingPoint!, details.globalPosition);
-                        break;
-                      case StrokeType.oval:
-                        currentOvalRectangle = Rect.fromPoints(
-                            startingPoint!, details.globalPosition);
-                        break;
-                      case StrokeType.line:
-                        currentLine = LineObject(
-                          startingPoint!,
-                          details.globalPosition,
-                          boardContent.strokeWidth,
-                          boardContent.brushColor,
-                        );
-                        break;
-                      case StrokeType.circle:
-                        // calculate center offset between starting point and current point
-                        final center = Offset(
-                          (startingPoint!.dx + details.globalPosition.dx) / 2,
-                          (startingPoint!.dy + details.globalPosition.dy) / 2,
-                        );
-                        // calculate radius
-                        final radius =
-                            (center - details.globalPosition).distance;
-
-                        currentCircle = CircleObject(
-                          center,
-                          radius,
-                          boardContent.strokeWidth,
-                          boardContent.brushColor,
-                        );
-                        break;
-                    }
-                  });
-                },
-                onPanEnd: (details) {
+                  final currentPoint = details.globalPosition;
                   switch (strokeType) {
-                    case StrokeType.pen:
-                      setState(() {
-                        savedDrawObjects.add(PenObject(
-                          currentPenPath,
-                          boardContent.strokeWidth,
-                          boardContent.brushColor,
-                        ));
-                        currentPenPath = [];
-                      });
+                    case ShapeType.pen:
+                      ref
+                          .read(boardContentProvider.notifier)
+                          .addScribbleToCurrentPenPath(currentPoint);
                       break;
-                    case StrokeType.rectangle:
-                      setState(() {
-                        savedDrawObjects.add(RectangleObject(
-                          currentRectangle!,
-                          boardContent.strokeWidth,
-                          boardContent.brushColor,
-                        ));
-                        currentRectangle = null;
-                      });
+                    case ShapeType.rectangle:
+                      ref
+                          .read(boardContentProvider.notifier)
+                          .addScribbleToCurrentRectangle(currentPoint);
                       break;
-                    case StrokeType.oval:
-                      setState(() {
-                        savedDrawObjects.add(OvalObject(
-                          currentOvalRectangle!,
-                          boardContent.strokeWidth,
-                          boardContent.brushColor,
-                        ));
-                        currentOvalRectangle = null;
-                      });
+                    case ShapeType.oval:
+                      ref
+                          .read(boardContentProvider.notifier)
+                          .addScribbleToCurrentOval(currentPoint);
                       break;
-                    case StrokeType.line:
-                      setState(() {
-                        savedDrawObjects.add(currentLine!);
-                        currentLine = null;
-                      });
+                    case ShapeType.line:
+                      ref
+                          .read(boardContentProvider.notifier)
+                          .addScribbleToCurrentLine(currentPoint);
                       break;
-                    case StrokeType.circle:
-                      setState(() {
-                        savedDrawObjects.add(currentCircle!);
-                        currentCircle = null;
-                      });
+                    case ShapeType.circle:
+                      ref
+                          .read(boardContentProvider.notifier)
+                          .addScribbleToCurrentCircle(currentPoint);
+                      break;
                   }
                 },
+                onPanEnd: (details) {
+                  ref
+                      .read(boardContentProvider.notifier)
+                      .addShapeToAllScribbles();
+                },
                 child: CustomPaint(
-                  painter: DrawingPainter(objectsToDraw),
+                  painter: DrawingPainter(boardContent.objectsToDraw),
                 ),
               ),
             ),
+            // ShapePalletteStore(ref: ref),
             Positioned(
               bottom: 12,
               left: 12,
@@ -182,21 +89,21 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       )),
-                  StrokeTypeStore(boardContent: boardContent, ref: ref),
+                  StrokeTypeStore(boardConfig: boardConfig, ref: ref),
                   const SizedBox(height: 12),
                   const Text("Stroke Width",
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       )),
-                  StrokePalletteStore(boardContent: boardContent, ref: ref),
+                  StrokePalletteStore(boardConfig: boardConfig, ref: ref),
                   const SizedBox(height: 12),
                   const Text("Color",
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       )),
-                  ColorPaletteStore(boardContent: boardContent, ref: ref),
+                  ColorPaletteStore(boardContent: boardConfig, ref: ref),
                 ],
               ),
             ),
@@ -205,13 +112,7 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
               left: 12,
               child: UndoChangesButton(
                 onPressed: () {
-                  setState(() {
-                    if (savedDrawObjects.isNotEmpty) {
-                      setState(() {
-                        savedDrawObjects.removeLast();
-                      });
-                    }
-                  });
+                  ref.read(boardContentProvider.notifier).undoMove();
                 },
               ),
             ),
@@ -220,9 +121,7 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          setState(() {
-            savedDrawObjects.clear();
-          });
+          ref.read(boardContentProvider.notifier).clearBoard();
         },
         child: const Icon(Icons.clear),
       ),
