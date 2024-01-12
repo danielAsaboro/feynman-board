@@ -1,7 +1,7 @@
-enum ShapeType {
+enum ScribbleType {
   oval,
   line,
   diamond,
-  scribble,
+  doodle,
   rectangle,
 }

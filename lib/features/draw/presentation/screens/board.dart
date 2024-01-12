@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/shapes/draw_object.dart';
-import '../../domain/entities/shapes/doodle.dart';
+import '../../domain/entities/shapes/drawing_painter.dart';
+import '../../domain/enums/shape_type.dart';
 import '../components/color_palette_store.dart';
 import '../components/shape_selector.dart';
 import '../components/stroke_pallet_store.dart';
 import '../components/undo_button.dart';
-import '../controllers/board_controller.dart';
+import '../controllers/board_config_controller.dart';
+import '../controllers/board_content.dart';
 
 class BoardWidget extends ConsumerStatefulWidget {
   const BoardWidget({super.key});
@@ -19,6 +21,7 @@ class BoardWidget extends ConsumerStatefulWidget {
 class _BoardWidgetState extends ConsumerState<BoardWidget> {
   @override
   Widget build(BuildContext context) {
+    final boardConfig = ref.watch(boardConfigProvider);
     final boardContent = ref.watch(boardContentProvider);
     return Scaffold(
       body: SizedBox(
@@ -28,28 +31,55 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
           children: [
             Positioned.fill(
               child: GestureDetector(
+                onPanDown: (details) {
+                  if (boardConfig.shape == ScribbleType.rectangle) {
+                    ref
+                        .read(boardContentProvider.notifier)
+                        .addRectangleStartPoint(details.globalPosition);
+                  }
+                },
                 onPanUpdate: (details) {
                   RenderBox renderBox = context.findRenderObject() as RenderBox;
                   final offset =
                       renderBox.globalToLocal(details.globalPosition);
-                  final newScribble = DrawObject(
-                    offset,
-                    boardContent.strokeWidth,
-                    boardContent.brushColor,
-                    boardContent.shape,
-                  );
-                  ref
-                      .read(boardContentProvider.notifier)
-                      .addToCurrentScribbles(newScribble);
+                  switch (boardConfig.shape) {
+                    case ScribbleType.doodle:
+                      ref
+                          .read(boardContentProvider.notifier)
+                          .addToCurrentScribbles(offset);
+                      break;
+                    case ScribbleType.rectangle:
+                      ref
+                          .read(boardContentProvider.notifier)
+                          .addRectangleToCurrentScribbles(offset);
+                      break;
+                    default:
+                  }
+
+                  //   if (strokeType == StrokeType.pen) {
+                  //   currentLinePath.add(details.globalPosition);
+                  // } else if (strokeType == StrokeType.rectangle) {
+                  //   currentRectangle =
+                  //       Rect.fromPoints(startingPoint!, details.globalPosition);
+                  // }
                 },
                 onPanEnd: (details) {
-                  // adding a null value here to separate individual strokes
-                  ref
-                      .read(boardContentProvider.notifier)
-                      .allCurrentScribblesToAllScribbles();
+                  switch (boardConfig.shape) {
+                    case ScribbleType.doodle:
+                      ref
+                          .read(boardContentProvider.notifier)
+                          .addCurrentDoddleToAllScribbles();
+                      break;
+                    case ScribbleType.rectangle:
+                      ref
+                          .read(boardContentProvider.notifier)
+                          .addRectangleToAllScribbles();
+                      break;
+                    default:
+                  }
                 },
                 child: CustomPaint(
-                  painter: Doodle(boardContent.allScribbles),
+                  painter: DrawingPainter(boardContent.allScribbles),
                 ),
               ),
             ),
@@ -70,14 +100,14 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       )),
-                  StrokePalletteStore(boardContent: boardContent, ref: ref),
+                  StrokePalletteStore(boardContent: boardConfig, ref: ref),
                   const SizedBox(height: 12),
                   const Text("Color",
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       )),
-                  ColorPaletteStore(boardContent: boardContent, ref: ref),
+                  ColorPaletteStore(boardContent: boardConfig, ref: ref),
                 ],
               ),
             ),

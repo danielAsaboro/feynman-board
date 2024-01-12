@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../domain/entities/board.dart';
-import '../controllers/board_controller.dart';
+import '../controllers/board_content.dart';
 
 class UndoChangesButton extends StatelessWidget {
   const UndoChangesButton({
@@ -28,7 +27,7 @@ class UndoChangesButton extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.grey.shade300,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.replay_circle_filled_sharp,
                 size: 50,
               )),

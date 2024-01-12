@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/enums/shape_type.dart';
-import '../controllers/board_controller.dart';
+import '../controllers/board_config_controller.dart';
 
 class ShapePalletteStore extends StatelessWidget {
   const ShapePalletteStore({
@@ -22,31 +22,31 @@ class ShapePalletteStore extends StatelessWidget {
           GestureDetector(
             onTap: () {
               ref
-                  .read(boardContentProvider.notifier)
-                  .changeShape(ShapeType.line);
+                  .read(boardConfigProvider.notifier)
+                  .changeShape(ScribbleType.rectangle);
             },
             child: Container(
               height: 30,
               width: 30,
               color: Colors.green,
-              child: SizedBox(height: 50, child: Text('Line')),
+              child: const SizedBox(height: 50, child: Text('Rectangle')),
             ),
           ),
-          Container(
+          const SizedBox(
             height: 30,
             width: 30,
           ),
           GestureDetector(
             onTap: () {
               ref
-                  .read(boardContentProvider.notifier)
-                  .changeShape(ShapeType.scribble);
+                  .read(boardConfigProvider.notifier)
+                  .changeShape(ScribbleType.doodle);
             },
             child: Container(
               height: 30,
               width: 30,
               color: Colors.green,
-              child: Text("Scribble"),
+              child: const Text("Scribble"),
             ),
           ),
         ],

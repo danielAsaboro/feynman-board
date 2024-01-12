@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../domain/entities/board.dart';
-import '../controllers/board_controller.dart';
+import '../../domain/entities/board_config.dart';
+import '../controllers/board_config_controller.dart';
 
 class StrokePalletteStore extends StatelessWidget {
   const StrokePalletteStore({
@@ -11,7 +11,7 @@ class StrokePalletteStore extends StatelessWidget {
     required this.ref,
   });
 
-  final BoardContent boardContent;
+  final BoardConfig boardContent;
   final WidgetRef ref;
 
   @override
@@ -24,7 +24,7 @@ class StrokePalletteStore extends StatelessWidget {
           return InkWell(
             onTap: () {
               ref
-                  .read(boardContentProvider.notifier)
+                  .read(boardConfigProvider.notifier)
                   .changeStrokeWidth(strokeWidth);
             },
             child: Container(

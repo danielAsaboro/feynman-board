@@ -7,4 +7,11 @@ mixin Brush {
       ..strokeCap = StrokeCap.round
       ..strokeWidth = strokeWidth;
   }
+
+  Paint getRectPaint(Color color, double strokeWidth) {
+    return Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke;
+  }
 }

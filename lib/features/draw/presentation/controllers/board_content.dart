@@ -1,41 +1,49 @@
-import 'package:feynman_board/features/draw/domain/enums/shape_type.dart';
-import 'package:flutter/material.dart';
+import 'dart:ui';
+
+import 'package:feynman_board/features/draw/domain/entities/board_content.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../domain/entities/board.dart';
 import '../../domain/entities/shapes/draw_object.dart';
+import 'board_config_controller.dart';
 
-class BoardControllerNotifier extends Notifier<BoardContent> {
+class BoardContentControllerNotifier extends Notifier<BoardContent> {
   @override
   build() {
     return BoardContent();
   }
 
-  void addToCurrentScribbles(DrawObject? newScribble) {
+  void addRectangleStartPoint(Offset startingPoint) {
+    state = state.copyWith(startPosition: startingPoint);
+  }
+
+  void addToCurrentScribbles(Offset newScribble) {
     final updatedCurrentScribbles = [...state.currentScribbles, newScribble];
     state = state.copyWith(currentScribbles: updatedCurrentScribbles);
   }
 
-  void allCurrentScribblesToAllScribbles() {
+  void addRectangleToCurrentScribbles(Offset offset) {
+    //
+  }
+
+  void addRectangleToAllScribbles() {
+    final Rect currentRectangle =
+        Rect.fromPoints(state.startPoint!, state.stopPoint!);
+    final rectangle = Rectangle(
+      state.startPoint!,
+      currentRectangle,
+      ref.read(boardConfigProvider).strokeWidth,
+      ref.read(boardConfigProvider).brushColor,
+    );
+    state = state.copyWith(rectangle: rectangle);
+    state = state.copyWith(rectangle: null);
+  }
+
+  void addCurrentDoddleToAllScribbles() {
     saveCurrentState();
     final updatedScribbles = [
       ...state.allScribbles,
-      null,
     ];
     state = state.copyWith(oldScribbles: updatedScribbles);
-  }
-
-  void changeShape(ShapeType shape) {
-    state = state.copyWith(shape: shape);
-    print("new shape: ${state.shape}");
-  }
-
-  void changeStrokeWidth(double width) {
-    state = state.copyWith(strokeWidth: width);
-  }
-
-  void changeBrushColor(Color color) {
-    state = state.copyWith(brushColor: color);
   }
 
   void clearBoard() {
@@ -45,7 +53,6 @@ class BoardControllerNotifier extends Notifier<BoardContent> {
 
   void saveCurrentState() {
     state = state.copyWith(
-      lastSavedScribbles: [...state.oldScribbles],
       currentScribbles: [...state.currentScribbles],
     );
 
@@ -53,7 +60,7 @@ class BoardControllerNotifier extends Notifier<BoardContent> {
     final savedScribbleStatesHistory = [
       ...state.savedScribbleStatesHistory,
     ];
-    savedScribbleStatesHistory.add([...state.lastSavedScribbles]);
+    savedScribbleStatesHistory.add([...state.oldScribbles]);
     state = state.copyWith(
       savedScribbleStatesHistory: savedScribbleStatesHistory,
       currentScribbles: [...state.currentScribbles],
@@ -73,5 +80,5 @@ class BoardControllerNotifier extends Notifier<BoardContent> {
 }
 
 final boardContentProvider =
-    NotifierProvider<BoardControllerNotifier, BoardContent>(
-        BoardControllerNotifier.new);
+    NotifierProvider<BoardContentControllerNotifier, BoardContent>(
+        BoardContentControllerNotifier.new);
