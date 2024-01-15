@@ -28,11 +28,32 @@ class BoardContentControllerNotifier extends Notifier<BoardContent> {
   }
 
   void addScribbleToCurrentRectangle(Offset currentPosition) {
+    final bool squareMode = RawKeyboard.instance.keysPressed
+        .where((element) => shiftKeys.contains(element))
+        .isNotEmpty;
+
     final startingPoint = state.startingPoint;
-    final currentRectangle = Rect.fromPoints(startingPoint!, currentPosition);
+    double width = currentPosition.dx - startingPoint!.dx;
+    double height = currentPosition.dy - startingPoint.dy;
+
+    if (squareMode) {
+      double sideLength =
+          width.abs() > height.abs() ? width.abs() : height.abs();
+      width = sideLength * (width.isNegative ? -1 : 1);
+      height = sideLength * (height.isNegative ? -1 : 1);
+    }
+
+    final currentRectangle = Rect.fromPoints(
+        startingPoint,
+        Offset(
+          startingPoint.dx + width,
+          startingPoint.dy + height,
+        ));
+
     state = state.copyWith(
-        boardConfig: ref.read(boardConfigProvider),
-        currentRectangle: currentRectangle);
+      boardConfig: ref.read(boardConfigProvider),
+      currentRectangle: currentRectangle,
+    );
   }
 
   void addScribbleToCurrentOval(Offset currentPosition) {
