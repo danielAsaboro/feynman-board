@@ -1,7 +1,6 @@
-import 'dart:ui';
-
 import 'package:feynman_board/features/draw/domain/entities/board_content.dart';
 import 'package:feynman_board/features/draw/presentation/controllers/board_config.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/shapes/draw_object.dart';
@@ -36,14 +35,16 @@ class BoardContentControllerNotifier extends Notifier<BoardContent> {
         currentRectangle: currentRectangle);
   }
 
-  void addScribbleToCurrentOval(Offset currentPosition,
-      {bool circleMode = false}) {
+  void addScribbleToCurrentOval(Offset currentPosition) {
+    final bool circleMode = RawKeyboard.instance.keysPressed
+        .where((element) => shiftKeys.contains(element))
+        .isNotEmpty;
+
     final startingPoint = state.startingPoint;
     double width = currentPosition.dx - startingPoint!.dx;
     double height = currentPosition.dy - startingPoint.dy;
 
     if (circleMode) {
-      // Enforce a circle by making the width and height equal
       double sideLength =
           width.abs() > height.abs() ? width.abs() : height.abs();
       width = sideLength * (width.isNegative ? -1 : 1);
@@ -61,13 +62,6 @@ class BoardContentControllerNotifier extends Notifier<BoardContent> {
       boardConfig: ref.read(boardConfigProvider),
       currentOvalRectangle: currentOvalRectangle,
     );
-
-    // final startingPoint = state.startingPoint;
-    // final currentOvalRectangle =
-    //     Rect.fromPoints(startingPoint!, currentPosition);
-    // state = state.copyWith(
-    //     boardConfig: ref.read(boardConfigProvider),
-    //     currentOvalRectangle: currentOvalRectangle);
   }
 
   void addScribbleToCurrentLine(Offset currentPosition) {
@@ -173,6 +167,8 @@ class BoardContentControllerNotifier extends Notifier<BoardContent> {
     }
   }
 }
+
+const shiftKeys = [LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight];
 
 final boardContentProvider =
     NotifierProvider<BoardContentControllerNotifier, BoardContent>(

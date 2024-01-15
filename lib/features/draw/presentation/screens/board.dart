@@ -53,9 +53,9 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
                     case ShapeType.oval:
                       ref
                           .read(boardContentProvider.notifier)
-                          .addScribbleToCurrentOval(currentPoint,
-                              circleMode:
-                                  true); // TODO: get this from shift pressed
+                          .addScribbleToCurrentOval(
+                            currentPoint,
+                          );
                       break;
                     case ShapeType.line:
                       ref
