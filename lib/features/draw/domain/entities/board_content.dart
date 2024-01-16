@@ -8,7 +8,6 @@ class BoardContent {
   late final Rect? currentOvalRectangle;
   late final Offset? startingPoint;
   late final LineObject? currentLine;
-  late final CircleObject? currentCircle;
   late final List<Offset?> currentPenPath;
 
   late final BoardConfig _boardConfig;
@@ -37,7 +36,6 @@ class BoardContent {
             _boardConfig.brushColor,
           ),
         if (currentLine != null) currentLine!,
-        if (currentCircle != null) currentCircle!,
       ];
 
   BoardContent({
@@ -49,7 +47,6 @@ class BoardContent {
     this.currentOvalRectangle,
     this.startingPoint,
     this.currentLine,
-    this.currentCircle,
   }) {
     this.savedDrawObjects = savedDrawObjects ?? [];
     this.savedDrawObjectStatesHistory = savedDrawObjectStatesHistory ?? [];
@@ -68,7 +65,6 @@ class BoardContent {
     Rect? currentOvalRectangle,
     Offset? startingPoint,
     LineObject? currentLine,
-    CircleObject? currentCircle,
   }) {
     return BoardContent(
       boardConfig: boardConfig,
@@ -78,7 +74,6 @@ class BoardContent {
       startingPoint: startPosition ?? this.startingPoint,
       currentPenPath: currentPenPath,
       currentRectangle: currentRectangle,
-      currentCircle: currentCircle,
       currentLine: currentLine,
       currentOvalRectangle: currentOvalRectangle,
     );

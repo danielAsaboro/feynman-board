@@ -53,17 +53,14 @@ class _BoardWidgetState extends ConsumerState<BoardWidget> {
                     case ShapeType.oval:
                       ref
                           .read(boardContentProvider.notifier)
-                          .addScribbleToCurrentOval(currentPoint);
+                          .addScribbleToCurrentOval(
+                            currentPoint,
+                          );
                       break;
                     case ShapeType.line:
                       ref
                           .read(boardContentProvider.notifier)
                           .addScribbleToCurrentLine(currentPoint);
-                      break;
-                    case ShapeType.circle:
-                      ref
-                          .read(boardContentProvider.notifier)
-                          .addScribbleToCurrentCircle(currentPoint);
                       break;
                   }
                 },

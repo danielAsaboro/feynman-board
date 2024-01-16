@@ -79,16 +79,3 @@ class LineObject extends DrawObject {
     canvas.drawLine(startPoint, endPoint, getPaint(color, strokeWidth));
   }
 }
-
-class CircleObject extends DrawObject {
-  final Offset center;
-  final double radius;
-
-  CircleObject(this.center, this.radius, double strokeWidth, Color color)
-      : super(strokeWidth, color);
-
-  @override
-  void paint(Canvas canvas) {
-    canvas.drawCircle(center, radius, getOutlinedPaint(color, strokeWidth));
-  }
-}

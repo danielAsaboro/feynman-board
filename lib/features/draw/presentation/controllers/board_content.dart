@@ -1,7 +1,6 @@
-import 'dart:ui';
-
 import 'package:feynman_board/features/draw/domain/entities/board_content.dart';
 import 'package:feynman_board/features/draw/presentation/controllers/board_config.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/shapes/draw_object.dart';
@@ -29,20 +28,61 @@ class BoardContentControllerNotifier extends Notifier<BoardContent> {
   }
 
   void addScribbleToCurrentRectangle(Offset currentPosition) {
+    final bool squareMode = RawKeyboard.instance.keysPressed
+        .where((element) => shiftKeys.contains(element))
+        .isNotEmpty;
+
     final startingPoint = state.startingPoint;
-    final currentRectangle = Rect.fromPoints(startingPoint!, currentPosition);
+    double width = currentPosition.dx - startingPoint!.dx;
+    double height = currentPosition.dy - startingPoint.dy;
+
+    if (squareMode) {
+      double sideLength =
+          width.abs() > height.abs() ? width.abs() : height.abs();
+      width = sideLength * (width.isNegative ? -1 : 1);
+      height = sideLength * (height.isNegative ? -1 : 1);
+    }
+
+    final currentRectangle = Rect.fromPoints(
+        startingPoint,
+        Offset(
+          startingPoint.dx + width,
+          startingPoint.dy + height,
+        ));
+
     state = state.copyWith(
-        boardConfig: ref.read(boardConfigProvider),
-        currentRectangle: currentRectangle);
+      boardConfig: ref.read(boardConfigProvider),
+      currentRectangle: currentRectangle,
+    );
   }
 
   void addScribbleToCurrentOval(Offset currentPosition) {
+    final bool circleMode = RawKeyboard.instance.keysPressed
+        .where((element) => shiftKeys.contains(element))
+        .isNotEmpty;
+
     final startingPoint = state.startingPoint;
-    final currentOvalRectangle =
-        Rect.fromPoints(startingPoint!, currentPosition);
+    double width = currentPosition.dx - startingPoint!.dx;
+    double height = currentPosition.dy - startingPoint.dy;
+
+    if (circleMode) {
+      double sideLength =
+          width.abs() > height.abs() ? width.abs() : height.abs();
+      width = sideLength * (width.isNegative ? -1 : 1);
+      height = sideLength * (height.isNegative ? -1 : 1);
+    }
+
+    final currentOvalRectangle = Rect.fromPoints(
+        startingPoint,
+        Offset(
+          startingPoint.dx + width,
+          startingPoint.dy + height,
+        ));
+
     state = state.copyWith(
-        boardConfig: ref.read(boardConfigProvider),
-        currentOvalRectangle: currentOvalRectangle);
+      boardConfig: ref.read(boardConfigProvider),
+      currentOvalRectangle: currentOvalRectangle,
+    );
   }
 
   void addScribbleToCurrentLine(Offset currentPosition) {
@@ -56,26 +96,6 @@ class BoardContentControllerNotifier extends Notifier<BoardContent> {
     );
     state = state.copyWith(
         boardConfig: ref.read(boardConfigProvider), currentLine: currentLine);
-  }
-
-  void addScribbleToCurrentCircle(Offset currentPosition) {
-    // calculate center offset between starting point and current point
-    final center = Offset(
-      (state.startingPoint!.dx + currentPosition.dx) / 2,
-      (state.startingPoint!.dy + currentPosition.dy) / 2,
-    );
-    // calculate radius
-    final radius = (center - currentPosition).distance;
-
-    final currentCircle = CircleObject(
-      center,
-      radius,
-      ref.read(boardConfigProvider).strokeWidth,
-      ref.read(boardConfigProvider).brushColor,
-    );
-    state = state.copyWith(
-        boardConfig: ref.read(boardConfigProvider),
-        currentCircle: currentCircle);
   }
 
   void addShapeToAllScribbles() {
@@ -125,12 +145,6 @@ class BoardContentControllerNotifier extends Notifier<BoardContent> {
           savedDrawObjects: savedDrawObjects,
         );
         break;
-      case ShapeType.circle:
-        savedDrawObjects.add(state.currentCircle!);
-        state = state.copyWith(
-          boardConfig: ref.read(boardConfigProvider),
-          savedDrawObjects: savedDrawObjects,
-        );
     }
   }
 
@@ -152,7 +166,6 @@ class BoardContentControllerNotifier extends Notifier<BoardContent> {
       savedDrawObjectStatesHistory: savedScribbleStatesHistory,
       currentPenPath: state.currentPenPath,
       currentRectangle: state.currentRectangle,
-      currentCircle: state.currentCircle,
       currentLine: state.currentLine,
       currentOvalRectangle: state.currentOvalRectangle,
     );
@@ -175,6 +188,8 @@ class BoardContentControllerNotifier extends Notifier<BoardContent> {
     }
   }
 }
+
+const shiftKeys = [LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.shiftRight];
 
 final boardContentProvider =
     NotifierProvider<BoardContentControllerNotifier, BoardContent>(
